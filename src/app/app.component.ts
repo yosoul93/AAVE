@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import Web3 from 'web3';
 import {Pool} from '@aave/contract-helpers';
+import { ethers } from 'ethers';
 
 declare var window: any
 
@@ -11,7 +11,7 @@ declare var window: any
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  public web3: Web3;
+  public web3: any;
   public provider: any;
   public userAddress: string;
   constructor() {
@@ -37,7 +37,7 @@ export class AppComponent {
   async initMetamask() {
     this.provider = this.getEthereumWalletProvider('isMetaMask');
     if (this.provider) {
-      this.web3 = new Web3(this.provider);
+      this.web3 = new ethers.providers.Web3Provider(this.provider);
       this.saveUserInfo();
     } else {
       console.log(
@@ -64,16 +64,16 @@ export class AppComponent {
   };
 
   async saveUserInfo() {
-    const address = await this.web3.eth.getAccounts();
+    const address = await this.web3.listAccounts();
     this.userAddress = address[0];
   };
 
   async signTransaction() {
     // This is example of avant v3 signature
-    const poll: any = new Pool(this.provider // or this.web.currentProvider 
+    const poll: any = new Pool(this.web3 
       , {
-      POOL: "0x794a61358D6845594F94dc1DB02A252b5b4814aD".toLocaleLowerCase(),
-      WETH_GATEWAY: "0xa938d8536aEed1Bd48f548380394Ab30Aa11B00E".toLocaleLowerCase(),
+      POOL: "0x794a61358D6845594F94dc1DB02A252b5b4814aD".toLowerCase(),
+      WETH_GATEWAY: "0xa938d8536aEed1Bd48f548380394Ab30Aa11B00E".toLowerCase(),
     });
     const user: string = this.userAddress.toLowerCase();
     const reserve: string = "0xd586e7f844cea2f87f50152665bcbc2c279d8d70".toLowerCase();
